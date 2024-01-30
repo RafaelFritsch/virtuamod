@@ -10,8 +10,7 @@
     <div
       class="flex items-center justify-between py-0 px-4"
       :class="{
-        'pb-3 border-b border-slate-75 dark:border-slate-700':
-          hasAppliedFiltersOrActiveFolders,
+        'pb-3 border-b border-slate-75 dark:border-slate-700': hasAppliedFiltersOrActiveFolders,
       }"
     >
       <div class="flex max-w-[85%] justify-center items-center">
@@ -25,7 +24,9 @@
           v-if="!hasAppliedFiltersOrActiveFolders"
           class="p-1 my-0.5 mx-1 rounded-md capitalize bg-slate-50 dark:bg-slate-800 text-xxs text-slate-600 dark:text-slate-300"
         >
-          {{ $t(`CHAT_LIST.CHAT_STATUS_FILTER_ITEMS.${activeStatus}.TEXT`) }}
+          {{
+            this.$t(`CHAT_LIST.CHAT_STATUS_FILTER_ITEMS.${activeStatus}.TEXT`)
+          }}
         </span>
       </div>
       <div class="flex items-center gap-1">
@@ -192,22 +193,21 @@
 <script>
 import { mapGetters } from 'vuex';
 
-import ConversationAdvancedFilter from './widgets/conversation/ConversationAdvancedFilter.vue';
-import ConversationBasicFilter from './widgets/conversation/ConversationBasicFilter.vue';
-import ChatTypeTabs from './widgets/ChatTypeTabs.vue';
-import ConversationCard from './widgets/conversation/ConversationCard.vue';
+import ConversationAdvancedFilter from './widgets/conversation/ConversationAdvancedFilter';
+import ConversationBasicFilter from './widgets/conversation/ConversationBasicFilter';
+import ChatTypeTabs from './widgets/ChatTypeTabs';
+import ConversationCard from './widgets/conversation/ConversationCard';
 import timeMixin from '../mixins/time';
 import eventListenerMixins from 'shared/mixins/eventListenerMixins';
 import conversationMixin from '../mixins/conversations';
 import wootConstants from 'dashboard/constants/globals';
 import advancedFilterTypes from './widgets/conversation/advancedFilterItems';
 import filterQueryGenerator from '../helper/filterQueryGenerator.js';
-import AddCustomViews from 'dashboard/routes/dashboard/customviews/AddCustomViews.vue';
+import AddCustomViews from 'dashboard/routes/dashboard/customviews/AddCustomViews';
 import DeleteCustomViews from 'dashboard/routes/dashboard/customviews/DeleteCustomViews.vue';
 import ConversationBulkActions from './widgets/conversation/conversationBulkActions/Index.vue';
 import alertMixin from 'shared/mixins/alertMixin';
 import filterMixin from 'shared/mixins/filterMixin';
-import uiSettingsMixin from 'dashboard/mixins/uiSettings';
 import languages from 'dashboard/components/widgets/conversation/advancedFilterItems/languages';
 import countries from 'shared/constants/countries';
 import { generateValuesForEditCustomViews } from 'dashboard/helper/customViewsHelper';
@@ -239,7 +239,6 @@ export default {
     eventListenerMixins,
     alertMixin,
     filterMixin,
-    uiSettingsMixin,
   ],
   props: {
     conversationInbox: {
@@ -295,6 +294,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      currentUserRole: 'getCurrentRole',
       currentChat: 'getSelectedChat',
       currentUser: 'getCurrentUser',
       chatLists: 'getAllConversations',
@@ -348,8 +348,13 @@ export default {
       const ASSIGNEE_TYPE_TAB_KEYS = {
         me: 'mineCount',
         unassigned: 'unAssignedCount',
-        all: 'allCount',
       };
+      
+      const isAvailableForTheUser = this.currentUserRole === 'administrator' ? true : false;
+      if (isAvailableForTheUser) {
+          ASSIGNEE_TYPE_TAB_KEYS.all = 'allCount';
+      }
+
       return Object.keys(ASSIGNEE_TYPE_TAB_KEYS).map(key => {
         const count = this.conversationStats[ASSIGNEE_TYPE_TAB_KEYS[key]] || 0;
         return {
@@ -410,12 +415,8 @@ export default {
     },
     conversationListPagination() {
       const conversationsPerPage = 25;
-      const hasChatsOnView =
-        this.chatsOnView &&
-        Array.isArray(this.chatsOnView) &&
-        !this.chatsOnView.length;
       const isNoFiltersOrFoldersAndChatListNotEmpty =
-        !this.hasAppliedFiltersOrActiveFolders && hasChatsOnView;
+        !this.hasAppliedFiltersOrActiveFolders && this.chatsOnView !== [];
       const isUnderPerPage =
         this.chatsOnView.length < conversationsPerPage &&
         this.activeAssigneeTabCount < conversationsPerPage &&
@@ -521,7 +522,6 @@ export default {
     },
   },
   mounted() {
-    this.setFiltersFromUISettings();
     this.$store.dispatch('setChatStatusFilter', this.activeStatus);
     this.$store.dispatch('setChatSortFilter', this.activeSortBy);
     this.resetAndFetchData();
@@ -551,12 +551,6 @@ export default {
       this.$store.dispatch('customViews/update', payloadData);
       this.closeAdvanceFiltersModal();
     },
-    setFiltersFromUISettings() {
-      const { conversations_filter_by: filterBy = {} } = this.uiSettings;
-      const { status, order_by: orderBy } = filterBy;
-      this.activeStatus = status || wootConstants.STATUS_TYPE.OPEN;
-      this.activeSortBy = orderBy || wootConstants.SORT_BY_TYPE.LATEST;
-    },
     onClickOpenAddFoldersModal() {
       this.showAddFoldersModal = true;
     },
@@ -570,6 +564,12 @@ export default {
       this.showDeleteFoldersModal = false;
     },
     onToggleAdvanceFiltersModal() {
+            
+      if (this.currentUserRole === 'agent') {
+        this.showAdvancedFilters = false;
+        return;
+      }
+
       if (!this.hasAppliedFilters && !this.hasActiveFolders) {
         this.initializeExistingFilterToModal();
       }
@@ -654,8 +654,10 @@ export default {
     },
     handleKeyEvents(e) {
       if (hasPressedAltAndJKey(e)) {
-        const { allConversations, activeConversationIndex } =
-          this.getKeyboardListenerParams();
+        const {
+          allConversations,
+          activeConversationIndex,
+        } = this.getKeyboardListenerParams();
         if (activeConversationIndex === -1) {
           allConversations[0].click();
         }

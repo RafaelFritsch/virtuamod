@@ -83,7 +83,7 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
             },
             {
               'action_name': :send_message,
-              'action_params': ['Welcome to the chatwoot platform.']
+              'action_params': ['Welcome to the VirtuaCRM platform.']
             },
             {
               'action_name': :resolve_conversation

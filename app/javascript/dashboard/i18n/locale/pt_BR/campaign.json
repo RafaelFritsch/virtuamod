@@ -25,7 +25,7 @@
         },
         "AUDIENCE": {
           "LABEL": "Público",
-          "PLACEHOLDER": "Selecionar marcadores dos clientes",
+          "PLACEHOLDER": "Selecionar etiquetas dos clientes",
           "ERROR": "Público é necessário"
         },
         "INBOX": {

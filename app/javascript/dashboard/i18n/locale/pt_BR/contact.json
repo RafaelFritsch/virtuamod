@@ -27,12 +27,12 @@
         "ERROR": "Falha ao atualizar etiquetas"
       },
       "CONVERSATION": {
-        "TITLE": "Marcador da conversa",
-        "ADD_BUTTON": "Adicionar marcador"
+        "TITLE": "Etiqueta da conversa",
+        "ADD_BUTTON": "Adicionar etiqueta"
       },
       "LABEL_SELECT": {
-        "TITLE": "Adicionar marcador",
-        "PLACEHOLDER": "Pesquisar marcador ",
+        "TITLE": "Adicionar etiqueta",
+        "PLACEHOLDER": "Pesquisar etiqueta ",
         "NO_RESULT": "Nenhum rótulo encontrado",
         "CREATE_LABEL": "Criar etiqueta"
       }

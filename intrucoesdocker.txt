@@ -1,7 +1,10 @@
+
+
+
 para criar um novo container
 
 
-==> docker image build -t virtuanoall .
+==> docker image build -t crmvirtua/virtuanoall:1.x .
 
 virtuanoall é o nome do container
 
@@ -9,3 +12,10 @@ virtuanoall é o nome do container
 ## Trocar a tag
 
 docker tag crmvirtua/nomedotrem:versao
+
+
+
+TESTE DE VERSÃO COM BOTÃO DE CAMPANHA QUE ENVIA PARA VIRTUASIM - EM 22/04/2024  ==> docker image build -t crmvirtua/virtuanoall:3.6.5-x .
+(teste falhou)
+
+
